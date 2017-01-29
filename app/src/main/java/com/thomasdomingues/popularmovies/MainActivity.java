@@ -1,12 +1,17 @@
 package com.thomasdomingues.popularmovies;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -21,6 +26,7 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements MovieListAdapter.MovieListAdapterOnClickHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String PREFERENCE_SORT_BY = "movie_list_sort_by";
 
     private static final int GRID_SPAN_COUNT = 2;
 
@@ -55,17 +61,41 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
-        fetchPopularMovies();
+        fetchMovies();
     }
 
-    private void fetchPopularMovies() {
-        showMovieListDataView();
-        new FetchMoviesTask().execute(NetworkUtils.SORT_BY_POPULAR);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
     }
 
-    private void fetchTopRatedMovies() {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_sort_by_popular:
+                saveMovieListSorting(NetworkUtils.SORT_BY_POPULAR);
+                fetchMovies();
+                return true;
+
+            case R.id.action_sort_by_top_rated:
+                saveMovieListSorting(NetworkUtils.SORT_BY_TOP_RATED);
+                fetchMovies();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void fetchMovies() {
+        if (null != mMovieListAdapter) {
+            mMovieListAdapter.setMovieListData(null);
+        }
         showMovieListDataView();
-        new FetchMoviesTask().execute(NetworkUtils.SORT_BY_TOP_RATED);
+
+        new FetchMoviesTask().execute(getMovieListSorting());
     }
 
     /**
@@ -143,5 +173,21 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
             }
 
         }
+    }
+
+    public void saveMovieListSorting(String sortBy) {
+        if (null == sortBy) {
+            return;
+        }
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putString(PREFERENCE_SORT_BY, sortBy);
+        edit.apply();
+    }
+
+    public String getMovieListSorting() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getString(PREFERENCE_SORT_BY, NetworkUtils.SORT_BY_POPULAR);
     }
 }
