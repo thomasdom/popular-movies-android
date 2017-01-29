@@ -1,15 +1,16 @@
 package com.thomasdomingues.popularmovies.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Movie {
+public class Movie implements Serializable {
     private String title;
     private Date releaseDate;
     private String posterUrl;
-    private int voteAverage;
+    private double voteAverage;
     private String synopsis;
 
-    public Movie(String title, Date releaseDate, String posterUrl, int voteAverage, String synopsis) {
+    public Movie(String title, Date releaseDate, String posterUrl, double voteAverage, String synopsis) {
         this.title = title;
         this.releaseDate = releaseDate;
         this.posterUrl = posterUrl;
@@ -21,39 +22,19 @@ public class Movie {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public Date getReleaseDate() {
         return releaseDate;
-    }
-
-    public void setReleaseDate(Date releaseDate) {
-        this.releaseDate = releaseDate;
     }
 
     public String getPosterUrl() {
         return posterUrl;
     }
 
-    public void setPosterUrl(String posterUrl) {
-        this.posterUrl = posterUrl;
-    }
-
-    public int getVoteAverage() {
+    public double getVoteAverage() {
         return voteAverage;
-    }
-
-    public void setVoteAverage(int voteAverage) {
-        this.voteAverage = voteAverage;
     }
 
     public String getSynopsis() {
         return synopsis;
-    }
-
-    public void setSynopsis(String synopsis) {
-        this.synopsis = synopsis;
     }
 }

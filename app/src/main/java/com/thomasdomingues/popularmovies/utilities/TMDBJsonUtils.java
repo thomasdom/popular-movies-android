@@ -81,7 +81,7 @@ public final class TMDBJsonUtils {
             String posterPath;
             String title;
             Date releaseDate;
-            int voteAverage;
+            double voteAverage;
             String synopsis;
 
             /* Get the JSON object representing the movie */
@@ -90,7 +90,7 @@ public final class TMDBJsonUtils {
             /* Get actual movie data */
             posterPath = movieObject.getString(TMDB_MOVIE_POSTER_URL);
             title = movieObject.getString(TMDB_MOVIE_TITLE);
-            voteAverage = movieObject.getInt(TMDB_MOVIE_VOTE_AVG);
+            voteAverage = movieObject.getDouble(TMDB_MOVIE_VOTE_AVG);
             synopsis = movieObject.getString(TMDB_MOVIE_SYNOPSIS);
 
             /* Remove beginning slash from poster path */

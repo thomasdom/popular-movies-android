@@ -1,13 +1,16 @@
 package com.thomasdomingues.popularmovies;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.thomasdomingues.popularmovies.adapters.MovieListAdapter;
 import com.thomasdomingues.popularmovies.models.Movie;
@@ -16,7 +19,8 @@ import com.thomasdomingues.popularmovies.utilities.TMDBJsonUtils;
 
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieListAdapter.MovieListAdapterOnClickHandler {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int GRID_SPAN_COUNT = 2;
 
@@ -26,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mErrorMessageDisplay;
 
     private ProgressBar mLoadingIndicator;
+    private Toast mToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setHasFixedSize(true);
 
-        mMovieListAdapter = new MovieListAdapter();
+        mMovieListAdapter = new MovieListAdapter(this);
 
         mRecyclerView.setAdapter(mMovieListAdapter);
 
@@ -79,6 +84,25 @@ public class MainActivity extends AppCompatActivity {
     private void showErrorMessage() {
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClick(Movie movie) {
+        if (null != movie) {
+            Log.d(TAG, "Clicked on movie: " + movie.getTitle());
+
+            Intent movieDetailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
+            movieDetailIntent.putExtra(MovieDetailActivity.TAG_MOVIE_DATA, movie);
+
+            startActivity(movieDetailIntent);
+        }
+        else {
+            if (null != mToast) {
+                mToast.cancel();
+            }
+            mToast = Toast.makeText(this, R.string.error_message_movie_detail, Toast.LENGTH_LONG);
+            mToast.show();
+        }
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
