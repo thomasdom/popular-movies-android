@@ -10,6 +10,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "TMDB_API_KEY", TMDB_API_KEY)
     }
     buildTypes {
         release {
@@ -26,4 +28,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.0'
     testCompile 'junit:junit:4.12'
+
+    compile 'com.squareup.okhttp3:okhttp:3.5.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }
