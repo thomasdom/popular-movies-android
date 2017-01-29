@@ -3,6 +3,9 @@ package com.thomasdomingues.popularmovies.models;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * This class defines a representation of some TMDB movie.
+ */
 public class Movie implements Serializable {
     private String title;
     private Date releaseDate;

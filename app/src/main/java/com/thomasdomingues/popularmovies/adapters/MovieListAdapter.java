@@ -36,10 +36,10 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
     /**
      * Cache of the children views for a movie list item.
      */
-    public class MovieListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public final ImageView mPosterImageView;
+    class MovieListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        final ImageView mPosterImageView;
 
-        public MovieListAdapterViewHolder(View view) {
+        MovieListAdapterViewHolder(View view) {
             super(view);
             mPosterImageView = (ImageView) view.findViewById(R.id.iv_movie_poster);
             view.setOnClickListener(this);
@@ -55,6 +55,9 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MovieListAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         if (null == mContext) {
@@ -66,6 +69,9 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
         return new MovieListAdapterViewHolder(view);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onBindViewHolder(MovieListAdapterViewHolder movieListAdapterViewHolder, int position) {
         if (null != mContext) {
@@ -81,6 +87,9 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getItemCount() {
         if (null == mMovieListData)

@@ -28,6 +28,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     private TextView mVoteAverage;
     private TextView mSynopsis;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +54,10 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This method binds the movie data to the children views of {@link MovieDetailActivity}.
+     * @param movie The movie you want to bind
+     */
     private void setupMovieDetails(Movie movie) {
         /* Setup basic movie string data */
         mTitle.setText(movie.getTitle());

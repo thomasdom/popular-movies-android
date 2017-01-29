@@ -26,18 +26,23 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements MovieListAdapter.MovieListAdapterOnClickHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    /* Key to access the sorting criteria saved in shared preferences */
     private static final String PREFERENCE_SORT_BY = "movie_list_sort_by";
 
+    /* Default number of columns displayed in the grid */
     private static final int GRID_SPAN_COUNT = 2;
 
+    /* Child views */
     private RecyclerView mRecyclerView;
     private MovieListAdapter mMovieListAdapter;
-
     private TextView mErrorMessageDisplay;
-
     private ProgressBar mLoadingIndicator;
     private Toast mToast;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         fetchMovies();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -71,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -89,6 +100,10 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         }
     }
 
+    /**
+     * This method fetch movie list by saved criteria in SharedPreferences, right after
+     * cleaning the RecyclerView.
+     */
     private void fetchMovies() {
         if (null != mMovieListAdapter) {
             mMovieListAdapter.setMovieListData(null);
@@ -116,6 +131,10 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Starts an activity to display details of the selected movie.
+     * @param movie The selected movie from the list.
+     */
     @Override
     public void onClick(Movie movie) {
         if (null != movie) {
@@ -175,6 +194,11 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         }
     }
 
+    /**
+     * Saves the sorting criteria for movie list.
+     * @param sortBy The sorting criteria. Must be {@link NetworkUtils#SORT_BY_POPULAR}
+     *               or {@link NetworkUtils#SORT_BY_TOP_RATED}
+     */
     public void saveMovieListSorting(String sortBy) {
         if (null == sortBy) {
             return;
@@ -186,6 +210,10 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         edit.apply();
     }
 
+    /**
+     * Get the sorting criteria saved in SharedPreferences.
+     * @return The sorting criteria
+     */
     public String getMovieListSorting() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         return prefs.getString(PREFERENCE_SORT_BY, NetworkUtils.SORT_BY_POPULAR);
