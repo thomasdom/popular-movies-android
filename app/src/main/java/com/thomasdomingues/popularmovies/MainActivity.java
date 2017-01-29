@@ -5,7 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
+import com.thomasdomingues.popularmovies.utilities.TMDBJsonUtils;
 
 import java.net.URL;
 
@@ -31,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         new FetchMoviesTask().execute(NetworkUtils.SORT_BY_TOP_RATED);
     }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, String> {
+    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected Movie[] doInBackground(String... params) {
             /* If there's no criteria, there's nothing to look up. */
             if (params.length == 0) {
                 return null;
@@ -49,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
             URL movieRequestUrl = NetworkUtils.buildUrl(criteria);
 
             try {
-                return NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
+                String jsonMovieListResponse =  NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
+                return TMDBJsonUtils.getMoviesFromJson(jsonMovieListResponse);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -57,9 +60,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String movieData) {
+        protected void onPostExecute(Movie[] movieData) {
             if (null != movieData) {
-                mDisplayResponse.setText(movieData);
+                mDisplayResponse.setText("");
+                for (Movie movie : movieData) {
+                    mDisplayResponse.append(movie.getTitle() + "\n\n\n");
+                }
             } else {
                 mDisplayResponse.setText("Could not fetch movie data from TMDB.");
             }
