@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Popular Movies</string>
+    <string name="content_description_movie_poster">Movie poster</string>
+    <string name="error_message_movie_list">Could not fetch movie list from TMDB. Try again!</string>
 </resources>

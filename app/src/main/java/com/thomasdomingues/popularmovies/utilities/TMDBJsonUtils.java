@@ -93,6 +93,11 @@ public final class TMDBJsonUtils {
             voteAverage = movieObject.getInt(TMDB_MOVIE_VOTE_AVG);
             synopsis = movieObject.getString(TMDB_MOVIE_SYNOPSIS);
 
+            /* Remove beginning slash from poster path */
+            if (posterPath.startsWith("/")) {
+                posterPath = posterPath.substring(1, posterPath.length());
+            }
+
             /* Parse directly release date String to java Date object */
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             releaseDate = format.parse(movieObject.getString(TMDB_MOVIE_RELEASE_DATE));

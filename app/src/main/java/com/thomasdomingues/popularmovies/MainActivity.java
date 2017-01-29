@@ -1,10 +1,15 @@
 package com.thomasdomingues.popularmovies;
 
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.thomasdomingues.popularmovies.adapters.MovieListAdapter;
 import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
 import com.thomasdomingues.popularmovies.utilities.TMDBJsonUtils;
@@ -13,31 +18,74 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView mDisplayResponse;
+    private static final int GRID_SPAN_COUNT = 2;
+
+    private RecyclerView mRecyclerView;
+    private MovieListAdapter mMovieListAdapter;
+
+    private TextView mErrorMessageDisplay;
+
+    private ProgressBar mLoadingIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDisplayResponse = (TextView) findViewById(R.id.tv_display_response);
+        /* Setup children views of main activity's layout */
+        mRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_list);
+        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+
+        /* Set grid layout manager for the RecyclerView */
+        GridLayoutManager layoutManager =
+                new GridLayoutManager(this, GRID_SPAN_COUNT, GridLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mRecyclerView.setHasFixedSize(true);
+
+        mMovieListAdapter = new MovieListAdapter();
+
+        mRecyclerView.setAdapter(mMovieListAdapter);
+
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         fetchPopularMovies();
     }
 
     private void fetchPopularMovies() {
+        showMovieListDataView();
         new FetchMoviesTask().execute(NetworkUtils.SORT_BY_POPULAR);
     }
 
     private void fetchTopRatedMovies() {
+        showMovieListDataView();
         new FetchMoviesTask().execute(NetworkUtils.SORT_BY_TOP_RATED);
+    }
+
+    /**
+     * This method will make the View for the movie list data visible and
+     * hide the error message.
+     */
+    private void showMovieListDataView() {
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * This method will make the error message visible and hide the movie list
+     * View.
+     */
+    private void showErrorMessage() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mDisplayResponse.setText("Loading movie data...");
+            mLoadingIndicator.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -61,13 +109,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Movie[] movieData) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
             if (null != movieData) {
-                mDisplayResponse.setText("");
-                for (Movie movie : movieData) {
-                    mDisplayResponse.append(movie.getTitle() + "\n\n\n");
-                }
+                showMovieListDataView();
+                mMovieListAdapter.setMovieListData(movieData);
             } else {
-                mDisplayResponse.setText("Could not fetch movie data from TMDB.");
+                showErrorMessage();
             }
 
         }
