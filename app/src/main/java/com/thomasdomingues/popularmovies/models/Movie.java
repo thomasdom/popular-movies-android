@@ -16,12 +16,15 @@ public class Movie implements Parcelable {
     private double voteAverage;
     private String overview;
 
-    public Movie(String title, Date releaseDate, String posterPath, double voteAverage, String overview) {
+    private boolean favorite;
+
+    public Movie(String title, Date releaseDate, String posterPath, double voteAverage, String overview, boolean favorite) {
         this.title = title;
         this.releaseDate = releaseDate;
         this.posterPath = posterPath;
         this.voteAverage = voteAverage;
         this.overview = overview;
+        this.favorite = favorite;
     }
 
     protected Movie(Parcel in) {
@@ -30,6 +33,7 @@ public class Movie implements Parcelable {
         posterPath = in.readString();
         voteAverage = in.readDouble();
         overview = in.readString();
+        favorite = in.readInt() == 1;
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -56,6 +60,7 @@ public class Movie implements Parcelable {
         out.writeString(posterPath);
         out.writeDouble(voteAverage);
         out.writeString(overview);
+        out.writeInt(favorite ? 1 : 0);
     }
 
     public String getTitle() {
@@ -76,5 +81,9 @@ public class Movie implements Parcelable {
 
     public String getOverview() {
         return overview;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
     }
 }
