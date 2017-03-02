@@ -16,6 +16,9 @@ import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
 
 import java.net.URL;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static android.content.ContentValues.TAG;
 
 /**
@@ -37,11 +40,12 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
      * Cache of the children views for a movie list item.
      */
     class MovieListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        final ImageView mPosterImageView;
+        @BindView(R.id.iv_movie_poster)
+        ImageView mPosterImageView;
 
         MovieListAdapterViewHolder(View view) {
             super(view);
-            mPosterImageView = (ImageView) view.findViewById(R.id.iv_movie_poster);
+            ButterKnife.bind(this, view);
             view.setOnClickListener(this);
         }
 
@@ -79,7 +83,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
 
             movieListAdapterViewHolder.itemView.setTag(currentMovie);
 
-            URL currentMoviePosterURL = NetworkUtils.buildPosterUrl(currentMovie.getPosterUrl());
+            URL currentMoviePosterURL = NetworkUtils.buildPosterUrl(currentMovie.getPosterPath());
             Uri currentMoviePosterUri = Uri.parse(currentMoviePosterURL.toString());
             Picasso.with(mContext)
                     .load(currentMoviePosterUri)

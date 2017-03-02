@@ -1,24 +1,61 @@
 package com.thomasdomingues.popularmovies.models;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Date;
 
 /**
- * This class defines a representation of some TMDB movie.
+ * This class defines a representation of a TMDB movie.
  */
-public class Movie implements Serializable {
+public class Movie implements Parcelable {
+
     private String title;
     private Date releaseDate;
-    private String posterUrl;
+    private String posterPath;
     private double voteAverage;
-    private String synopsis;
+    private String overview;
 
-    public Movie(String title, Date releaseDate, String posterUrl, double voteAverage, String synopsis) {
+    public Movie(String title, Date releaseDate, String posterPath, double voteAverage, String overview) {
         this.title = title;
         this.releaseDate = releaseDate;
-        this.posterUrl = posterUrl;
+        this.posterPath = posterPath;
         this.voteAverage = voteAverage;
-        this.synopsis = synopsis;
+        this.overview = overview;
+    }
+
+    protected Movie(Parcel in) {
+        title = in.readString();
+        releaseDate = new Date(in.readLong());
+        posterPath = in.readString();
+        voteAverage = in.readDouble();
+        overview = in.readString();
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(title);
+        out.writeLong(releaseDate.getTime());
+        out.writeString(posterPath);
+        out.writeDouble(voteAverage);
+        out.writeString(overview);
     }
 
     public String getTitle() {
@@ -29,15 +66,15 @@ public class Movie implements Serializable {
         return releaseDate;
     }
 
-    public String getPosterUrl() {
-        return posterUrl;
+    public String getPosterPath() {
+        return posterPath;
     }
 
     public double getVoteAverage() {
         return voteAverage;
     }
 
-    public String getSynopsis() {
-        return synopsis;
+    public String getOverview() {
+        return overview;
     }
 }
