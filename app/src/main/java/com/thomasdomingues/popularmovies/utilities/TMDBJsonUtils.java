@@ -102,7 +102,7 @@ public final class TMDBJsonUtils {
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             releaseDate = format.parse(movieObject.getString(TMDB_MOVIE_RELEASE_DATE));
 
-            parsedMovieData[i] = new Movie(title, releaseDate, posterPath, voteAverage, synopsis);
+            parsedMovieData[i] = new Movie(title, releaseDate, posterPath, voteAverage, synopsis, false);
         }
 
         return parsedMovieData;
