@@ -1,27 +1,52 @@
 package com.thomasdomingues.popularmovies;
 
-import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.thomasdomingues.popularmovies.data.MovieContract;
 import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
 
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>
+{
 
-    public static final String TAG_MOVIE_DATA = "movie_data";
+    public static final String[] MOVIE_DETAIL_PROJECTION = {
+            MovieContract.MovieEntry.COLUMN_TITLE,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_SYNOPSIS,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_FAVORITE
+    };
+
+    public static final int INDEX_MOVIE_TITLE = 0;
+    public static final int INDEX_MOVIE_RELEASE_DATE = 1;
+    public static final int INDEX_MOVIE_POSTER_PATH = 2;
+    public static final int INDEX_MOVIE_SYNOPSIS = 3;
+    public static final int INDEX_MOVIE_VOTE_AVERAGE = 4;
+    public static final int INDEX_MOVIE_IS_FAVORITE = 5;
+
+    private static final int MOVIE_DETAILS_LOADER_ID = 51;
+
+    private Uri mUri;
 
     /* Child views */
     @BindView(R.id.iv_movie_detail_poster)
@@ -43,22 +68,68 @@ public class MovieDetailActivity extends AppCompatActivity {
      * {@inheritDoc}
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
 
         /* Instantiate child views */
         ButterKnife.bind(this);
 
-        /* Get intent passed movie and display details */
-        Intent intent = getIntent();
+        mUri = getIntent().getData();
 
-        if (intent.hasExtra(TAG_MOVIE_DATA)) {
-            Movie movie = intent.getParcelableExtra(TAG_MOVIE_DATA);
+        if (null == mUri)
+            throw new NullPointerException("URI for " + MovieDetailActivity.class.getSimpleName() + " cannot be null");
 
-            if (null != movie)
-                setupMovieDetails(movie);
+        getSupportLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args)
+    {
+        switch (loaderId)
+        {
+            case MOVIE_DETAILS_LOADER_ID:
+                return new CursorLoader(this,
+                        mUri,
+                        MOVIE_DETAIL_PROJECTION,
+                        null,
+                        null,
+                        null);
+
+            default:
+                throw new RuntimeException("Loader not implemented: " + loaderId);
         }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data)
+    {
+        boolean cursorHasValidData = false;
+        if (null != data && data.moveToFirst())
+        {
+            cursorHasValidData = true;
+        }
+
+        if (!cursorHasValidData) {
+            return;
+        }
+
+        String title = data.getString(INDEX_MOVIE_TITLE);
+        Date releaseDate = new Date(data.getLong(INDEX_MOVIE_RELEASE_DATE));
+        String posterPath = data.getString(INDEX_MOVIE_POSTER_PATH);
+        double voteAverage = data.getDouble(INDEX_MOVIE_VOTE_AVERAGE);
+        String synopsis = data.getString(INDEX_MOVIE_SYNOPSIS);
+        boolean favorite = data.getInt(INDEX_MOVIE_IS_FAVORITE) == 1;
+
+        Movie movie = new Movie(title, releaseDate, posterPath, voteAverage, synopsis, favorite);
+
+        setupMovieDetails(movie);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader)
+    {
     }
 
     /**
@@ -66,7 +137,8 @@ public class MovieDetailActivity extends AppCompatActivity {
      *
      * @param movie The movie you want to bind
      */
-    private void setupMovieDetails(Movie movie) {
+    private void setupMovieDetails(Movie movie)
+    {
         /* Setup basic movie string data */
         mTitle.setText(movie.getTitle());
         mVoteAverage.setText(String.format(

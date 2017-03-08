@@ -1,7 +1,9 @@
 package com.thomasdomingues.popularmovies.adapters;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,8 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
+import com.thomasdomingues.popularmovies.MainActivity;
 import com.thomasdomingues.popularmovies.R;
-import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
 
 import java.net.URL;
@@ -28,12 +30,67 @@ import static android.content.ContentValues.TAG;
 public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MovieListAdapterViewHolder> {
 
     private Context mContext;
-    private Movie[] mMovieListData;
+    private Cursor mCursor;
 
     private final MovieListAdapterOnClickHandler mClickHandler;
 
-    public MovieListAdapter(MovieListAdapterOnClickHandler clickHandler) {
+    public MovieListAdapter(@NonNull Context context, MovieListAdapterOnClickHandler clickHandler) {
+        mContext = context;
         mClickHandler = clickHandler;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MovieListAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        View view = LayoutInflater
+                .from(mContext)
+                .inflate(R.layout.movie_list_item, viewGroup, false);
+
+        return new MovieListAdapterViewHolder(view);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onBindViewHolder(MovieListAdapterViewHolder movieListAdapterViewHolder, int position) {
+        mCursor.moveToPosition(position);
+
+        long movieId = mCursor.getLong(MainActivity.INDEX_MOVIE_ID);
+        String posterPath = mCursor.getString(MainActivity.INDEX_POSTER_PATH);
+
+        movieListAdapterViewHolder.itemView.setTag(movieId);
+
+        URL currentMoviePosterURL = NetworkUtils.buildPosterUrl(posterPath);
+        Uri currentMoviePosterUri = Uri.parse(currentMoviePosterURL.toString());
+
+        Picasso.with(mContext)
+                .load(currentMoviePosterUri)
+                .into(movieListAdapterViewHolder.mPosterImageView);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getItemCount() {
+        if (null == mCursor)
+            return 0;
+        return mCursor.getCount();
+    }
+
+    /**
+     * This method is used to set the movie list data on a MovieListAdapter if we've already
+     * created one. This is handy when we get new data from the web but don't want to create a
+     * new MovieListAdapter to display it.
+     *
+     * @param movieListData The new movie list data to be displayed.
+     */
+    public void swapCursor(Cursor movieListData) {
+        mCursor = movieListData;
+        notifyDataSetChanged();
     }
 
     /**
@@ -52,68 +109,12 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
         @Override
         public void onClick(View view) {
             Log.d(TAG, "Clicked on a movie.");
-            Movie selectedMovie = (Movie) view.getTag();
-            if (null != selectedMovie) {
-                mClickHandler.onClick(selectedMovie);
-            }
+            long selectedMovieId = (long) view.getTag();
+            mClickHandler.onClick(selectedMovieId);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MovieListAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        if (null == mContext) {
-            mContext = viewGroup.getContext();
-        }
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-
-        View view = inflater.inflate(R.layout.movie_list_item, viewGroup, false);
-        return new MovieListAdapterViewHolder(view);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onBindViewHolder(MovieListAdapterViewHolder movieListAdapterViewHolder, int position) {
-        if (null != mContext) {
-            Movie currentMovie = mMovieListData[position];
-
-            movieListAdapterViewHolder.itemView.setTag(currentMovie);
-
-            URL currentMoviePosterURL = NetworkUtils.buildPosterUrl(currentMovie.getPosterPath());
-            Uri currentMoviePosterUri = Uri.parse(currentMoviePosterURL.toString());
-            Picasso.with(mContext)
-                    .load(currentMoviePosterUri)
-                    .into(movieListAdapterViewHolder.mPosterImageView);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getItemCount() {
-        if (null == mMovieListData)
-            return 0;
-        return mMovieListData.length;
-    }
-
-    /**
-     * This method is used to set the movie list data on a MovieListAdapter if we've already
-     * created one. This is handy when we get new data from the web but don't want to create a
-     * new MovieListAdapter to display it.
-     *
-     * @param movieListData The new movie list data to be displayed.
-     */
-    public void setMovieListData(Movie[] movieListData) {
-        mMovieListData = movieListData;
-        notifyDataSetChanged();
     }
 
     public interface MovieListAdapterOnClickHandler {
-        void onClick(Movie movie);
+        void onClick(long movieId);
     }
 }

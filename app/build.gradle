@@ -22,24 +22,36 @@ android {
 }
 
 dependencies {
+    // Local dependencies
     compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Android support libraries
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:recyclerview-v7:25.2.0'
+
+    // Firebase libraries
+    compile 'com.firebase:firebase-jobdispatcher:0.5.2'
+
+    // Third-party libraries
+    compile 'com.jakewharton:butterknife:8.4.0'
+    compile 'com.squareup.okhttp3:okhttp:3.5.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
+    // Testing libraries
+    testCompile 'junit:junit:4.12'
+
+    // Espresso UI testing
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
     androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.0') {
+        exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'appcompat'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude module: 'recyclerview-v7'
     }
 
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.android.support:recyclerview-v7:25.2.0'
-    testCompile 'junit:junit:4.12'
-
-    compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'com.squareup.okhttp3:okhttp:3.5.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-
+    // Annotation processors
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
 }

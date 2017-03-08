@@ -1,6 +1,8 @@
 package com.thomasdomingues.popularmovies.utilities;
 
-import com.thomasdomingues.popularmovies.models.Movie;
+import android.content.ContentValues;
+
+import com.thomasdomingues.popularmovies.data.MovieContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,11 +26,11 @@ public final class TMDBJsonUtils {
      *
      * @param moviesJsonStr JSON response from server
      *
-     * @return Array of Movie objects describing movies
+     * @return Array of ContentValues objects describing movies
      *
      * @throws JSONException If JSON data cannot be properly parsed
      */
-    public static Movie[] getMoviesFromJson(String moviesJsonStr)
+    public static ContentValues[] getMoviesContentValuesFromJson(String moviesJsonStr)
             throws JSONException, ParseException {
 
         /* Movies list. Each movie is an element of the "results" array */
@@ -49,7 +51,7 @@ public final class TMDBJsonUtils {
         final String TMDB_ERROR_CODE = "status_code";
 
         /* Movie array to hold each movie */
-        Movie[] parsedMovieData;
+        ContentValues[] parsedMovieData;
 
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
 
@@ -74,7 +76,7 @@ public final class TMDBJsonUtils {
 
         JSONArray movieArray = moviesJson.getJSONArray(TMDB_RESULTS);
 
-        parsedMovieData = new Movie[movieArray.length()];
+        parsedMovieData = new ContentValues[movieArray.length()];
 
         for (int i = 0; i < movieArray.length(); i++) {
             /* These are the values that will be collected */
@@ -102,7 +104,16 @@ public final class TMDBJsonUtils {
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             releaseDate = format.parse(movieObject.getString(TMDB_MOVIE_RELEASE_DATE));
 
-            parsedMovieData[i] = new Movie(title, releaseDate, posterPath, voteAverage, synopsis, false);
+            ContentValues movieValues = new ContentValues();
+
+            movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, title);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate.getTime());
+            movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, synopsis);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, voteAverage);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_FAVORITE, 0);
+
+            parsedMovieData[i] = movieValues;
         }
 
         return parsedMovieData;
