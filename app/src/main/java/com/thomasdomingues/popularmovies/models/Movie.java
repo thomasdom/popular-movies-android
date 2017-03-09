@@ -1,23 +1,47 @@
 package com.thomasdomingues.popularmovies.models;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.Date;
 import java.util.List;
 
 public class Movie
 {
+    @SerializedName("poster_path")
     private String posterPath;
-    private Boolean adult;
+
+    private boolean adult;
+
     private String overview;
-    private String releaseDate;
+
+    @SerializedName("release_date")
+    private Date releaseDate;
+
+    @SerializedName("genre_ids")
     private List<Integer> genreIds = null;
-    private Integer id;
+
+    private int id;
+
+    @SerializedName("original_title")
     private String originalTitle;
+
+    @SerializedName("original_language")
     private String originalLanguage;
+
     private String title;
+
+    @SerializedName("backdrop_path")
     private String backdropPath;
-    private Double popularity;
-    private Integer voteCount;
-    private Boolean video;
-    private Integer voteAverage;
+
+    private double popularity;
+
+    @SerializedName("vote_count")
+    private int voteCount;
+
+    private boolean video;
+
+    @SerializedName("vote_average")
+    private double voteAverage;
 
     /**
      * @param id               TMDB movie identifier
@@ -35,7 +59,7 @@ public class Movie
      * @param video            Checks if movie has videos
      * @param popularity       TMDB popularity score for movie
      */
-    public Movie(String posterPath, Boolean adult, String overview, String releaseDate, List<Integer> genreIds, Integer id, String originalTitle, String originalLanguage, String title, String backdropPath, Double popularity, Integer voteCount, Boolean video, Integer voteAverage)
+    public Movie(String posterPath, boolean adult, String overview, Date releaseDate, List<Integer> genreIds, int id, String originalTitle, String originalLanguage, String title, String backdropPath, double popularity, int voteCount, boolean video, double voteAverage)
     {
         super();
         this.posterPath = posterPath;
@@ -64,12 +88,12 @@ public class Movie
         this.posterPath = posterPath;
     }
 
-    public Boolean getAdult()
+    public boolean getAdult()
     {
         return adult;
     }
 
-    public void setAdult(Boolean adult)
+    public void setAdult(boolean adult)
     {
         this.adult = adult;
     }
@@ -84,12 +108,12 @@ public class Movie
         this.overview = overview;
     }
 
-    public String getReleaseDate()
+    public Date getReleaseDate()
     {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate)
+    public void setReleaseDate(Date releaseDate)
     {
         this.releaseDate = releaseDate;
     }
@@ -104,12 +128,12 @@ public class Movie
         this.genreIds = genreIds;
     }
 
-    public Integer getId()
+    public int getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(int id)
     {
         this.id = id;
     }
@@ -154,42 +178,42 @@ public class Movie
         this.backdropPath = backdropPath;
     }
 
-    public Double getPopularity()
+    public double getPopularity()
     {
         return popularity;
     }
 
-    public void setPopularity(Double popularity)
+    public void setPopularity(double popularity)
     {
         this.popularity = popularity;
     }
 
-    public Integer getVoteCount()
+    public int getVoteCount()
     {
         return voteCount;
     }
 
-    public void setVoteCount(Integer voteCount)
+    public void setVoteCount(int voteCount)
     {
         this.voteCount = voteCount;
     }
 
-    public Boolean getVideo()
+    public boolean getVideo()
     {
         return video;
     }
 
-    public void setVideo(Boolean video)
+    public void setVideo(boolean video)
     {
         this.video = video;
     }
 
-    public Integer getVoteAverage()
+    public double getVoteAverage()
     {
         return voteAverage;
     }
 
-    public void setVoteAverage(Integer voteAverage)
+    public void setVoteAverage(double voteAverage)
     {
         this.voteAverage = voteAverage;
     }

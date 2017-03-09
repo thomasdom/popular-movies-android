@@ -1,7 +1,6 @@
 package com.thomasdomingues.popularmovies.adapters;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -12,11 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
-import com.thomasdomingues.popularmovies.MainActivity;
 import com.thomasdomingues.popularmovies.R;
+import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
 
 import java.net.URL;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,7 +30,7 @@ import static android.content.ContentValues.TAG;
 public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MovieListAdapterViewHolder> {
 
     private Context mContext;
-    private Cursor mCursor;
+    private List<Movie> mMovies;
 
     private final MovieListAdapterOnClickHandler mClickHandler;
 
@@ -56,10 +56,10 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
      */
     @Override
     public void onBindViewHolder(MovieListAdapterViewHolder movieListAdapterViewHolder, int position) {
-        mCursor.moveToPosition(position);
+        Movie movie = mMovies.get(position);
 
-        long movieId = mCursor.getLong(MainActivity.INDEX_MOVIE_ID);
-        String posterPath = mCursor.getString(MainActivity.INDEX_POSTER_PATH);
+        long movieId = movie.getId();
+        String posterPath = movie.getPosterPath();
 
         movieListAdapterViewHolder.itemView.setTag(movieId);
 
@@ -76,9 +76,9 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
      */
     @Override
     public int getItemCount() {
-        if (null == mCursor)
+        if (null == mMovies)
             return 0;
-        return mCursor.getCount();
+        return mMovies.size();
     }
 
     /**
@@ -88,8 +88,8 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
      *
      * @param movieListData The new movie list data to be displayed.
      */
-    public void swapCursor(Cursor movieListData) {
-        mCursor = movieListData;
+    public void setMovieList(List<Movie> movieListData) {
+        mMovies = movieListData;
         notifyDataSetChanged();
     }
 

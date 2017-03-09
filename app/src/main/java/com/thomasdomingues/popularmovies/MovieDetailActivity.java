@@ -120,9 +120,8 @@ public class MovieDetailActivity extends AppCompatActivity implements
         String posterPath = data.getString(INDEX_MOVIE_POSTER_PATH);
         double voteAverage = data.getDouble(INDEX_MOVIE_VOTE_AVERAGE);
         String synopsis = data.getString(INDEX_MOVIE_SYNOPSIS);
-        boolean favorite = data.getInt(INDEX_MOVIE_IS_FAVORITE) == 1;
 
-        Movie movie = new Movie(title, releaseDate, posterPath, voteAverage, synopsis, favorite);
+        Movie movie = new Movie(posterPath, false, synopsis, releaseDate, null, 0, title, "en", title, null, 0.0, 0, false, voteAverage);
 
         setupMovieDetails(movie);
     }
