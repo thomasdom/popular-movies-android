@@ -1,4 +1,4 @@
-package com.thomasdomingues.popularmovies;
+package com.thomasdomingues.popularmovies.ui.activities;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -13,7 +13,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.thomasdomingues.popularmovies.adapters.MovieListAdapter;
+import com.thomasdomingues.popularmovies.R;
+import com.thomasdomingues.popularmovies.ui.adapters.MovieListAdapter;
 import com.thomasdomingues.popularmovies.data.MovieContract;
 import com.thomasdomingues.popularmovies.data.api.MoviesApiClient;
 import com.thomasdomingues.popularmovies.data.api.MoviesApiService;

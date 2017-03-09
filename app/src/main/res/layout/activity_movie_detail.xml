@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.thomasdomingues.popularmovies.MovieDetailActivity">
+    tools:context="com.thomasdomingues.popularmovies.ui.activities.MovieDetailActivity">
 
     <RelativeLayout
         android:id="@+id/activity_movie_detail"

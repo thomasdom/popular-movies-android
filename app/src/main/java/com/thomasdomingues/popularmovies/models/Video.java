@@ -1,16 +1,14 @@
 package com.thomasdomingues.popularmovies.models;
 
-
 public class Video
 {
-
     private String id;
     private String iso6391;
     private String iso31661;
     private String key;
     private String name;
     private String site;
-    private Integer size;
+    private int size;
     private String type;
 
     /**
@@ -23,7 +21,7 @@ public class Video
      * @param key      TMDB video key
      * @param size     TMDB video format
      */
-    public Video(String id, String iso6391, String iso31661, String key, String name, String site, Integer size, String type)
+    public Video(String id, String iso6391, String iso31661, String key, String name, String site, int size, String type)
     {
         super();
         this.id = id;
@@ -96,12 +94,12 @@ public class Video
         this.site = site;
     }
 
-    public Integer getSize()
+    public int getSize()
     {
         return size;
     }
 
-    public void setSize(Integer size)
+    public void setSize(int size)
     {
         this.size = size;
     }
@@ -115,5 +113,4 @@ public class Video
     {
         this.type = type;
     }
-
 }

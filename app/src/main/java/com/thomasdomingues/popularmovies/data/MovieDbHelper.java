@@ -12,7 +12,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
      * If you change the database schema, you must increment the database version or the onUpgrade
      * method will not be called.
      */
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -39,9 +39,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
                         MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE    + " REAL NOT NULL, "                        +
 
-                        MovieContract.MovieEntry.COLUMN_SYNOPSIS        + " TEXT NOT NULL, "                        +
-
-                        MovieContract.MovieEntry.COLUMN_FAVORITE        + " INTEGER NOT NULL"                       +
+                        MovieContract.MovieEntry.COLUMN_SYNOPSIS        + " TEXT NOT NULL "                         +
 
                 ");";
 

@@ -9,7 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-public class MovieProvider extends ContentProvider {
+public class MovieProvider extends ContentProvider
+{
 
     public static final int CODE_MOVIES = 100;
     public static final int CODE_MOVIE_WITH_ID = 101;
@@ -18,7 +19,8 @@ public class MovieProvider extends ContentProvider {
 
     private MovieDbHelper mMovieHelper;
 
-    static {
+    static
+    {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
@@ -26,58 +28,53 @@ public class MovieProvider extends ContentProvider {
         sUriMatcher.addURI(authority, MovieContract.PATH_MOVIES + "/#", CODE_MOVIE_WITH_ID);
     }
 
-    public MovieProvider() {
+    public MovieProvider()
+    {
     }
 
     @Override
-    public boolean onCreate() {
+    public boolean onCreate()
+    {
         mMovieHelper = new MovieDbHelper(getContext());
         return true;
     }
 
     @Override
-    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
+    public Uri insert(@NonNull Uri uri, ContentValues value)
+    {
         final SQLiteDatabase db = mMovieHelper.getWritableDatabase();
+        long _id;
+        Uri newUri;
 
-        switch (sUriMatcher.match(uri)) {
+        switch (sUriMatcher.match(uri))
+        {
 
             case CODE_MOVIES:
-                db.beginTransaction();
-                int rowsInserted = 0;
-                try {
-                    for (ContentValues value : values) {
-                        long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, value);
-                        if (_id != -1) {
-                            rowsInserted++;
-                        }
-                    }
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                }
+                _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, value);
 
-                if (rowsInserted > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
-                }
+                if (_id > 0)
+                    newUri = MovieContract.MovieEntry.buildMovieUriWithId(_id);
+                else
+                    throw new UnsupportedOperationException("Unable to insert a new row into: " + uri);
 
-                return rowsInserted;
+                break;
 
             default:
-                return super.bulkInsert(uri, values);
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-    }
 
-    @Override
-    public Uri insert(@NonNull Uri uri, ContentValues values) {
-        throw new UnsupportedOperationException("We are not implementing insert method. Please use bulkInsert instead.");
+        getContext().getContentResolver().notifyChange(uri, null);
+        return newUri;
     }
 
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sortOrder) {
+                        String[] selectionArgs, String sortOrder)
+    {
         Cursor cursor;
 
-        switch (sUriMatcher.match(uri)) {
+        switch (sUriMatcher.match(uri))
+        {
 
             case CODE_MOVIE_WITH_ID:
                 String movieIdString = uri.getLastPathSegment();
@@ -115,18 +112,20 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection,
-                      String[] selectionArgs) {
-        // TODO: Implement this to handle requests to update one or more rows.
-        throw new UnsupportedOperationException("Not yet implemented");
+                      String[] selectionArgs)
+    {
+        throw new UnsupportedOperationException("Won't implement. Please delete then reinsert.");
     }
 
     @Override
-    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs)
+    {
         int numRowsDeleted;
 
         if (null == selection) selection = "1";
 
-        switch (sUriMatcher.match(uri)) {
+        switch (sUriMatcher.match(uri))
+        {
 
             case CODE_MOVIES:
                 numRowsDeleted = mMovieHelper.getWritableDatabase().delete(
@@ -140,7 +139,8 @@ public class MovieProvider extends ContentProvider {
         }
 
         /* If we actually deleted any rows, notify that a change has occurred to this URI */
-        if (numRowsDeleted != 0) {
+        if (numRowsDeleted != 0)
+        {
             getContext().getContentResolver().notifyChange(uri, null);
         }
 
@@ -148,7 +148,8 @@ public class MovieProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(@NonNull Uri uri) {
+    public String getType(@NonNull Uri uri)
+    {
         // TODO: Implement this to handle requests for the MIME type of the data
         // at the given URI.
         throw new UnsupportedOperationException("Not yet implemented");
@@ -160,7 +161,8 @@ public class MovieProvider extends ContentProvider {
      */
     @Override
     @TargetApi(11)
-    public void shutdown() {
+    public void shutdown()
+    {
         mMovieHelper.close();
         super.shutdown();
     }

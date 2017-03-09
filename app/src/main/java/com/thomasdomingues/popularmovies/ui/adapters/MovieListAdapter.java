@@ -1,4 +1,4 @@
-package com.thomasdomingues.popularmovies.adapters;
+package com.thomasdomingues.popularmovies.ui.adapters;
 
 import android.content.Context;
 import android.net.Uri;

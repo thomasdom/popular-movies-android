@@ -1,4 +1,4 @@
-package com.thomasdomingues.popularmovies;
+package com.thomasdomingues.popularmovies.ui.activities;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.thomasdomingues.popularmovies.R;
 import com.thomasdomingues.popularmovies.data.MovieContract;
 import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;

@@ -36,9 +36,6 @@ public class MovieContract {
         /* Movie synopsis  */
         public static final String COLUMN_SYNOPSIS = "synopsis";
 
-        /* Boolean telling if Movie is marked as favorite by user  */
-        public static final String COLUMN_FAVORITE = "favorite";
-
 
         /**
          * Builds a URI that adds the movie identifier to the end of the movies content URI path.
