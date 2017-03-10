@@ -15,4 +15,10 @@
     <string name="btn_trailer_watch_desc">Click to watch movie trailer</string>
     <string name="tv_stub_trailer_label">Trailer #1</string>
     <string name="tv_trailer_list_title">Trailers</string>
+    <string name="tv_review_list_title">Reviews</string>
+    <string name="error_movie_reviews">Could not fetch movie reviews.</string>
+    <string name="tv_stub_review_author_label">Author</string>
+    <string name="tv_stub_review_content_label"><![CDATA[This is a stub review for testing purposes. Star Wars for the win <3]]></string>
+    <string name="empty_movie_reviews">No reviews for the moment.</string>
+    <string name="empty_movie_trailers">No videos for the moment.</string>
 </resources>

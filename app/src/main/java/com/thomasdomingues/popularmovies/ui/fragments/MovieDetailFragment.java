@@ -20,9 +20,12 @@ import com.squareup.picasso.Picasso;
 import com.thomasdomingues.popularmovies.R;
 import com.thomasdomingues.popularmovies.data.api.MoviesApiClient;
 import com.thomasdomingues.popularmovies.data.api.MoviesApiService;
+import com.thomasdomingues.popularmovies.data.api.responses.ReviewListResponse;
 import com.thomasdomingues.popularmovies.data.api.responses.VideoListResponse;
 import com.thomasdomingues.popularmovies.models.Movie;
+import com.thomasdomingues.popularmovies.models.Review;
 import com.thomasdomingues.popularmovies.models.Video;
+import com.thomasdomingues.popularmovies.ui.adapters.MovieReviewsAdapter;
 import com.thomasdomingues.popularmovies.ui.adapters.MovieVideosAdapter;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
 import com.trello.rxlifecycle2.components.support.RxFragment;
@@ -51,7 +54,8 @@ import static android.content.ContentValues.TAG;
  * create an instance of this fragment.
  */
 public class MovieDetailFragment extends RxFragment implements
-        MovieVideosAdapter.MovieVideosAdapterOnClickHandler
+        MovieVideosAdapter.MovieVideosAdapterOnClickHandler,
+        MovieReviewsAdapter.MovieReviewsAdapterOnClickHandler
 {
     private static final String EXTRA_MOVIE = "movie_tag";
 
@@ -68,12 +72,32 @@ public class MovieDetailFragment extends RxFragment implements
     @BindView(R.id.pb_movie_trailers_loading)
     protected ProgressBar mTrailerListLoadingIndicator;
 
+    @BindView(R.id.tv_empty_movie_trailers)
+    protected TextView mTrailerListEmptyTv;
+
     @BindView(R.id.tv_error_movie_trailers)
     protected TextView mTrailerListErrorTv;
 
     private MovieVideosAdapter mTrailerListAdapter;
 
     private int mTrailerListPosition = RecyclerView.NO_POSITION;
+
+    /* Movie reviews */
+    @BindView(R.id.rv_movie_reviews)
+    protected RecyclerView mReviewListRv;
+
+    @BindView(R.id.pb_movie_reviews_loading)
+    protected ProgressBar mReviewListLoadingIndicator;
+
+    @BindView(R.id.tv_empty_movie_reviews)
+    protected TextView mReviewListEmptyTv;
+
+    @BindView(R.id.tv_error_movie_reviews)
+    protected TextView mReviewListErrorTv;
+
+    private MovieReviewsAdapter mReviewListAdapter;
+
+    private int mReviewListPosition = RecyclerView.NO_POSITION;
 
     /* Child views */
     @BindView(R.id.iv_movie_detail_poster)
@@ -142,22 +166,34 @@ public class MovieDetailFragment extends RxFragment implements
 
         mTmdbApiService = MoviesApiClient.getMoviesApiClientInstance();
 
-        /* Setup adapter */
+        /* Setup trailer list views */
         mTrailerListAdapter = new MovieVideosAdapter(getContext(), this);
 
-        /* Setup RecyclerView */
-        LinearLayoutManager layoutManager =
+        LinearLayoutManager trailerLayoutManager =
                 new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
 
-        mTrailerListRv.setLayoutManager(layoutManager);
+        mTrailerListRv.setLayoutManager(trailerLayoutManager);
 
         mTrailerListRv.setHasFixedSize(true);
 
         mTrailerListRv.setAdapter(mTrailerListAdapter);
 
+        /* Setup review list views */
+        mReviewListAdapter = new MovieReviewsAdapter(getContext(), this);
+
+        LinearLayoutManager reviewLayoutManager =
+                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+
+        mReviewListRv.setLayoutManager(reviewLayoutManager);
+
+        mReviewListRv.setHasFixedSize(true);
+
+        mReviewListRv.setAdapter(mReviewListAdapter);
+
         if (null != mMovie) {
             setupMovieDetails(mMovie);
             fetchMovieTrailers();
+            fetchMovieReviews();
         }
     }
 
@@ -188,6 +224,15 @@ public class MovieDetailFragment extends RxFragment implements
         if (video != null && video.getSite().equalsIgnoreCase("youtube")) {
             Intent intent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://www.youtube.com/watch?v=" + video.getKey()));
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onSelectedReview(Review review)
+    {
+        if (review != null && review.getUrl() != null) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(review.getUrl()));
             startActivity(intent);
         }
     }
@@ -292,7 +337,68 @@ public class MovieDetailFragment extends RxFragment implements
                             showTrailerListErrorMessage();
                         } else
                         {
-                            showTrailerList();
+                            if (null != mTrailerListAdapter && mTrailerListAdapter.getItemCount() > 0)
+                                showTrailerList();
+                            else
+                                showEmptyTrailerList();
+                        }
+                    }
+                });
+    }
+
+    public void fetchMovieReviews()
+    {
+        /* Setup loading UI */
+        showReviewList();
+        mReviewListLoadingIndicator.setVisibility(View.VISIBLE);
+
+        mTmdbApiService.reviews(mMovie.getId(), 1)
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.newThread())
+                .map(ReviewListResponse::getResults)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<Review>>()
+                {
+                    boolean error = false;
+
+                    @Override
+                    public void onSubscribe(Disposable d)
+                    {
+                        Log.d(TAG, "onSubscribe : " + d.isDisposed());
+                    }
+
+                    @Override
+                    public void onNext(List<Review> reviews)
+                    {
+                        mReviewListAdapter.setReviewList(reviews);
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        Log.e(TAG, e.getMessage());
+                        error = true;
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        mReviewListLoadingIndicator.setVisibility(View.INVISIBLE);
+
+                        if (mReviewListPosition == RecyclerView.NO_POSITION)
+                            mReviewListPosition = 0;
+
+                        mReviewListRv.smoothScrollToPosition(mReviewListPosition);
+
+                        if (error)
+                        {
+                            showReviewListErrorMessage();
+                        } else
+                        {
+                            if (null != mReviewListAdapter && mReviewListAdapter.getItemCount() > 0)
+                                showReviewList();
+                            else
+                                showEmptyReviewList();
                         }
                     }
                 });
@@ -302,11 +408,41 @@ public class MovieDetailFragment extends RxFragment implements
     {
         mTrailerListRv.setVisibility(View.VISIBLE);
         mTrailerListErrorTv.setVisibility(View.GONE);
+        mTrailerListEmptyTv.setVisibility(View.GONE);
+    }
+
+    private void showEmptyTrailerList()
+    {
+        mTrailerListRv.setVisibility(View.INVISIBLE);
+        mTrailerListErrorTv.setVisibility(View.GONE);
+        mTrailerListEmptyTv.setVisibility(View.VISIBLE);
     }
 
     private void showTrailerListErrorMessage()
     {
         mTrailerListRv.setVisibility(View.INVISIBLE);
         mTrailerListErrorTv.setVisibility(View.VISIBLE);
+        mTrailerListEmptyTv.setVisibility(View.GONE);
+    }
+
+    private void showReviewList()
+    {
+        mReviewListRv.setVisibility(View.VISIBLE);
+        mReviewListErrorTv.setVisibility(View.GONE);
+        mReviewListEmptyTv.setVisibility(View.GONE);
+    }
+
+    private void showEmptyReviewList()
+    {
+        mReviewListRv.setVisibility(View.INVISIBLE);
+        mReviewListErrorTv.setVisibility(View.GONE);
+        mReviewListEmptyTv.setVisibility(View.VISIBLE);
+    }
+
+    private void showReviewListErrorMessage()
+    {
+        mReviewListRv.setVisibility(View.INVISIBLE);
+        mReviewListErrorTv.setVisibility(View.VISIBLE);
+        mReviewListEmptyTv.setVisibility(View.GONE);
     }
 }
