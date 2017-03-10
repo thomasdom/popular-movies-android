@@ -1,7 +1,9 @@
 package com.thomasdomingues.popularmovies.ui.fragments;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,12 +14,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.squareup.picasso.Picasso;
 import com.thomasdomingues.popularmovies.R;
+import com.thomasdomingues.popularmovies.data.MovieContract;
 import com.thomasdomingues.popularmovies.data.api.MoviesApiClient;
 import com.thomasdomingues.popularmovies.data.api.MoviesApiService;
 import com.thomasdomingues.popularmovies.data.api.responses.ReviewListResponse;
@@ -55,7 +61,8 @@ import static android.content.ContentValues.TAG;
  */
 public class MovieDetailFragment extends RxFragment implements
         MovieVideosAdapter.MovieVideosAdapterOnClickHandler,
-        MovieReviewsAdapter.MovieReviewsAdapterOnClickHandler
+        MovieReviewsAdapter.MovieReviewsAdapterOnClickHandler,
+        CompoundButton.OnClickListener
 {
     private static final String EXTRA_MOVIE = "movie_tag";
 
@@ -114,6 +121,9 @@ public class MovieDetailFragment extends RxFragment implements
 
     @BindView(R.id.tv_movie_detail_synopsis)
     protected TextView mSynopsis;
+
+    @BindView(R.id.tb_favorite_movie_action)
+    protected ToggleButton mFavoriteTb;
 
     public MovieDetailFragment()
     {
@@ -190,8 +200,12 @@ public class MovieDetailFragment extends RxFragment implements
 
         mReviewListRv.setAdapter(mReviewListAdapter);
 
-        if (null != mMovie) {
+        mFavoriteTb.setOnClickListener(this);
+
+        if (null != mMovie)
+        {
             setupMovieDetails(mMovie);
+            setupFavoriteButton();
             fetchMovieTrailers();
             fetchMovieReviews();
         }
@@ -221,7 +235,8 @@ public class MovieDetailFragment extends RxFragment implements
     @Override
     public void onSelectedTrailer(Video video)
     {
-        if (video != null && video.getSite().equalsIgnoreCase("youtube")) {
+        if (video != null && video.getSite().equalsIgnoreCase("youtube"))
+        {
             Intent intent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://www.youtube.com/watch?v=" + video.getKey()));
             startActivity(intent);
@@ -231,10 +246,47 @@ public class MovieDetailFragment extends RxFragment implements
     @Override
     public void onSelectedReview(Review review)
     {
-        if (review != null && review.getUrl() != null) {
+        if (review != null && review.getUrl() != null)
+        {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(review.getUrl()));
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onClick(View button)
+    {
+        if (mFavoriteTb.isChecked())
+        {
+            ContentValues contentValues = new ContentValues();
+
+            contentValues.put(MovieContract.MovieEntry.COLUMN_TITLE, mMovie.getTitle());
+            contentValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, mMovie.getReleaseDate().getTime());
+            contentValues.put(MovieContract.MovieEntry.COLUMN_TMDB_ID, mMovie.getId());
+            contentValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, mMovie.getPosterPath());
+            contentValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, mMovie.getOverview());
+            contentValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, mMovie.getVoteAverage());
+
+            Uri newFavoriteMovieUri = getContext().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI,
+                    contentValues);
+
+            if (null != newFavoriteMovieUri)
+                Toast.makeText(getContext(), "Successfully favored \"" + mMovie.getTitle() + "\".", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getContext(), "An error occurred while favoring this movie.", Toast.LENGTH_LONG).show();
+        } else
+        {
+            int deletedRows = getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
+                    MovieContract.MovieEntry.COLUMN_TMDB_ID + " = ?",
+                    new String[]{String.valueOf(mMovie.getId())});
+
+            if (deletedRows > 0)
+                Toast.makeText(getContext(), "Successfully unfavored \"" + mMovie.getTitle() + "\".", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getContext(), "An error occurred while unfavoring this movie.", Toast.LENGTH_LONG).show();
+        }
+
+        setupFavoriteButton();
     }
 
     /**
@@ -286,6 +338,39 @@ public class MovieDetailFragment extends RxFragment implements
         URL posterPath = NetworkUtils.buildPosterUrl(movie.getPosterPath());
         Uri posterUrl = Uri.parse(posterPath.toString());
         Picasso.with(getContext()).load(posterUrl).into(mPoster);
+    }
+
+    private void setupFavoriteButton()
+    {
+        // Toggle button if movie is in favorite list
+        if (null != mMovie)
+        {
+            boolean isFavored = movieIsFavored();
+            mFavoriteTb.setChecked(isFavored);
+        }
+    }
+
+    private boolean movieIsFavored()
+    {
+        if (null != mMovie)
+        {
+            Cursor result = getContext().getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
+                    new String[]{MovieContract.MovieEntry._ID},
+                    MovieContract.MovieEntry.COLUMN_TMDB_ID + " = ?",
+                    new String[]{String.valueOf(mMovie.getId())},
+                    null);
+
+            boolean favored = false;
+            if (null != result && result.getCount() == 1)
+            {
+                favored = true;
+                result.close();
+            }
+
+            return favored;
+        }
+
+        return false;
     }
 
     public void fetchMovieTrailers()

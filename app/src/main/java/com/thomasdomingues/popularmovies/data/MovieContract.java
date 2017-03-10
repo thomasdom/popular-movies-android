@@ -24,6 +24,9 @@ public class MovieContract {
         /* Movie title */
         public static final String COLUMN_TITLE = "title";
 
+        /* Movie TMDB identifier */
+        public static final String COLUMN_TMDB_ID = "tmdb_id";
+
         /* Movie release date is stored as a long representing milliseconds since January, 1st 1970 */
         public static final String COLUMN_RELEASE_DATE = "release_date";
 

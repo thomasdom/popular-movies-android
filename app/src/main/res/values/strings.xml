@@ -21,4 +21,6 @@
     <string name="tv_stub_review_content_label"><![CDATA[This is a stub review for testing purposes. Star Wars for the win <3]]></string>
     <string name="empty_movie_reviews">No reviews for the moment.</string>
     <string name="empty_movie_trailers">No videos for the moment.</string>
+    <string name="tb_favorite_on_label">Favorite</string>
+    <string name="tb_favorite_off_label">Not favorite</string>
 </resources>

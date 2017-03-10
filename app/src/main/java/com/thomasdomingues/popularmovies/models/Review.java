@@ -38,11 +38,6 @@ public class Review
         return author;
     }
 
-    public void setAuthor(String author)
-    {
-        this.author = author;
-    }
-
     public String getContent()
     {
         return content;
@@ -56,10 +51,5 @@ public class Review
     public String getUrl()
     {
         return url;
-    }
-
-    public void setUrl(String url)
-    {
-        this.url = url;
     }
 }
