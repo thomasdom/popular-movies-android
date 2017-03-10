@@ -1,14 +1,25 @@
 package com.thomasdomingues.popularmovies.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Video
 {
     private String id;
+
+    @SerializedName("iso_639_1")
     private String iso6391;
+
+    @SerializedName("iso_3166_1")
     private String iso31661;
+
     private String key;
+
     private String name;
+
     private String site;
+
     private int size;
+
     private String type;
 
     /**

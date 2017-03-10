@@ -3,7 +3,7 @@ package com.thomasdomingues.popularmovies.data.api.responses;
 import com.google.gson.annotations.SerializedName;
 import com.thomasdomingues.popularmovies.models.Video;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class VideoListResponse
 {
@@ -11,9 +11,9 @@ public class VideoListResponse
     private long movieId;
 
     @SerializedName("results")
-    private ArrayList<Video> results;
+    private List<Video> results;
 
-    public VideoListResponse(long movieId, ArrayList<Video> results) {
+    public VideoListResponse(long movieId, List<Video> results) {
         this.movieId = movieId;
         this.results = results;
     }
@@ -22,7 +22,7 @@ public class VideoListResponse
         return movieId;
     }
 
-    public ArrayList<Video> getResults() {
+    public List<Video> getResults() {
         return results;
     }
 }
