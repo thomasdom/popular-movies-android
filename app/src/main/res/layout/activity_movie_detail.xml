@@ -7,7 +7,7 @@
     tools:context="com.thomasdomingues.popularmovies.ui.activities.MovieDetailActivity">
 
     <FrameLayout
-        android:id="@+id/movie_detail_fragment"
+        android:id="@+id/movie_details_frag_placeholder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </FrameLayout>

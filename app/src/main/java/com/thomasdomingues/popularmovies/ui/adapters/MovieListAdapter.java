@@ -58,10 +58,9 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
     public void onBindViewHolder(MovieListAdapterViewHolder movieListAdapterViewHolder, int position) {
         Movie movie = mMovies.get(position);
 
-        long movieId = movie.getId();
         String posterPath = movie.getPosterPath();
 
-        movieListAdapterViewHolder.itemView.setTag(movieId);
+        movieListAdapterViewHolder.itemView.setTag(movie);
 
         URL currentMoviePosterURL = NetworkUtils.buildPosterUrl(posterPath);
         Uri currentMoviePosterUri = Uri.parse(currentMoviePosterURL.toString());
@@ -108,13 +107,13 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
 
         @Override
         public void onClick(View view) {
-            Log.d(TAG, "Clicked on a movie.");
-            long selectedMovieId = (long) view.getTag();
-            mClickHandler.onClick(selectedMovieId);
+            Movie selectedMovie = (Movie) view.getTag();
+            Log.d(TAG, "Clicked on movie: " + selectedMovie.getTitle());
+            mClickHandler.onClick(selectedMovie);
         }
     }
 
     public interface MovieListAdapterOnClickHandler {
-        void onClick(long movieId);
+        void onClick(Movie movie);
     }
 }

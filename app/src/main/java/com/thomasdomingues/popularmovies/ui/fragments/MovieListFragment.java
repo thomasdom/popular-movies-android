@@ -121,6 +121,7 @@ public class MovieListFragment extends RxFragment
         fetchMovies();
     }
 
+    // TODO Replace stub by real function
     public void onButtonPressed(Uri uri)
     {
         if (mListener != null)

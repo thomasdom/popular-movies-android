@@ -3,6 +3,7 @@ package com.thomasdomingues.popularmovies.ui.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.thomasdomingues.popularmovies.R;
 import com.thomasdomingues.popularmovies.models.Movie;
-import com.thomasdomingues.popularmovies.ui.activities.MovieDetailActivity;
 import com.thomasdomingues.popularmovies.utilities.NetworkUtils;
 
 import java.net.URL;
@@ -34,7 +34,7 @@ import butterknife.ButterKnife;
  */
 public class MovieDetailFragment extends Fragment
 {
-    private static final String EXTRA_MOVIE_ID = "movie_id";
+    private static final String EXTRA_MOVIE = "movie_tag";
 
     private Movie mMovie;
 
@@ -65,14 +65,14 @@ public class MovieDetailFragment extends Fragment
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param movieId The TMDB movie identifier from which the user wants details.
+     * @param movie The TMDB movie from which the user wants details.
      * @return A new instance of fragment MovieDetailFragment.
      */
-    public static MovieDetailFragment newInstance(long movieId)
+    public static MovieDetailFragment newInstance(Movie movie)
     {
         MovieDetailFragment fragment = new MovieDetailFragment();
         Bundle args = new Bundle();
-        args.putLong(EXTRA_MOVIE_ID, movieId);
+        args.putParcelable(EXTRA_MOVIE, movie);
         fragment.setArguments(args);
         return fragment;
     }
@@ -83,8 +83,7 @@ public class MovieDetailFragment extends Fragment
         super.onCreate(savedInstanceState);
         if (getArguments() != null)
         {
-            // TODO Convert movie identifier to real Movie instance
-            // mMovie = getArguments().getLong(EXTRA_MOVIE_ID);
+            mMovie = getArguments().getParcelable(EXTRA_MOVIE);
         }
     }
 
@@ -107,6 +106,16 @@ public class MovieDetailFragment extends Fragment
         if (mListener != null)
         {
             mListener.onFragmentInteraction(uri);
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (null != mMovie) {
+            setupMovieDetails(mMovie);
         }
     }
 
@@ -148,7 +157,7 @@ public class MovieDetailFragment extends Fragment
     }
 
     /**
-     * This method binds the movie data to the children views of {@link MovieDetailActivity}.
+     * This method binds the movie data to the children views of {@link MovieDetailFragment}.
      *
      * @param movie The movie you want to bind
      */

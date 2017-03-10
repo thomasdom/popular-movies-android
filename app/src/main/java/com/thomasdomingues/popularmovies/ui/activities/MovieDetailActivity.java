@@ -3,6 +3,7 @@ package com.thomasdomingues.popularmovies.ui.activities;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -19,6 +20,13 @@ public class MovieDetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
         MovieDetailFragment.OnFragmentInteractionListener
 {
+    public static final String EXTRA_MOVIE = "movie_tag";
+
+    /* Fragment manager tags */
+    private static final String MOVIE_DETAIL_FRAGMENT_TAG = "fragment_movie_detail";
+
+    /* Fragments */
+    private MovieDetailFragment mMovieDetailsFragment;
 
     public static final String[] MOVIE_DETAIL_PROJECTION = {
             MovieContract.MovieEntry.COLUMN_TITLE,
@@ -48,13 +56,33 @@ public class MovieDetailActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_movie_detail);
 
         // TODO Move loader in fragment
-
+        /*
         mUri = getIntent().getData();
 
         if (null == mUri)
             throw new NullPointerException("URI for " + MovieDetailActivity.class.getSimpleName() + " cannot be null");
 
         getSupportLoaderManager().initLoader(MOVIE_DETAILS_LOADER_ID, null, this);
+        */
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onPostCreate(savedInstanceState);
+
+        Movie movie = getIntent().getParcelableExtra(EXTRA_MOVIE);
+
+        if (null == movie)
+            throw new NullPointerException(MovieDetailActivity.class.getSimpleName() + " intent must contain a movie tagged by EXTRA_MOVIE.");
+
+        mMovieDetailsFragment = (MovieDetailFragment) getSupportFragmentManager().findFragmentByTag(MOVIE_DETAIL_FRAGMENT_TAG);
+        if (null == mMovieDetailsFragment)
+        {
+            MovieDetailFragment fragment = MovieDetailFragment.newInstance(movie);
+
+            replaceMovieDetailsFragment(fragment);
+        }
     }
 
     @Override
@@ -106,5 +134,13 @@ public class MovieDetailActivity extends AppCompatActivity implements
     public void onFragmentInteraction(Uri uri)
     {
 
+    }
+
+    private void replaceMovieDetailsFragment(MovieDetailFragment fragment)
+    {
+        // TODO Set custom animations
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_details_frag_placeholder, fragment, MOVIE_DETAIL_FRAGMENT_TAG)
+                .commit();
     }
 }

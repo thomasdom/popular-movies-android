@@ -10,7 +10,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.thomasdomingues.popularmovies.R;
-import com.thomasdomingues.popularmovies.data.MovieContract;
+import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.ui.adapters.MovieListAdapter;
 import com.thomasdomingues.popularmovies.ui.fragments.MovieDetailFragment;
 import com.thomasdomingues.popularmovies.ui.fragments.MovieListFragment;
@@ -118,22 +118,21 @@ public class MainActivity extends RxAppCompatActivity implements
     /**
      * Starts an activity to display details of the selected movie.
      *
-     * @param movieId The selected movie ID from the list.
+     * @param movie The selected movie ID from the list.
      */
     @Override
-    public void onClick(long movieId)
+    public void onClick(Movie movie)
     {
-        Log.d(TAG, "Clicked on movie ID: " + movieId);
+        Log.d(TAG, "Displaying details for movie: " + movie.getTitle());
 
         if (mTwoPanes)
         {
-            MovieDetailFragment fragment = MovieDetailFragment.newInstance("", "");
+            MovieDetailFragment fragment = MovieDetailFragment.newInstance(movie);
             replaceMovieDetailsFragment(fragment);
         } else
         {
             Intent movieDetailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
-            Uri uriForMovieClicked = MovieContract.MovieEntry.buildMovieUriWithId(movieId);
-            movieDetailIntent.setData(uriForMovieClicked);
+            movieDetailIntent.putExtra(MovieDetailActivity.EXTRA_MOVIE, movie);
 
             startActivity(movieDetailIntent);
         }

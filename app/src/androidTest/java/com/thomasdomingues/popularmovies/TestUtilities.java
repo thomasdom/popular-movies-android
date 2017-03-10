@@ -33,7 +33,6 @@ class TestUtilities {
     private static final String COLUMN_POSTER_PATH = MovieEntry.COLUMN_POSTER_PATH;
     private static final String COLUMN_SYNOPSIS = MovieEntry.COLUMN_SYNOPSIS;
     private static final String COLUMN_VOTE_AVERAGE = MovieEntry.COLUMN_VOTE_AVERAGE;
-    private static final String COLUMN_FAVORITE = MovieEntry.COLUMN_FAVORITE;
 
     static void validateCurrentRecord(String error, Cursor valueCursor, ContentValues expectedValues) {
         Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
@@ -69,7 +68,6 @@ class TestUtilities {
         testMovieValues.put(COLUMN_POSTER_PATH, "/7SMCz5724COOYDhY0mj0NfcJqxH.jpg");
         testMovieValues.put(COLUMN_SYNOPSIS, "When a wounded Christian Grey tries to entice a cautious Ana Steele back into his life, she demands a new arrangement before she will give him another chance. As the two begin to build trust and find stability, shadowy figures from Christian’s past start to circle the couple, determined to destroy their hopes for a future together.");
         testMovieValues.put(COLUMN_VOTE_AVERAGE, 6.1);
-        testMovieValues.put(COLUMN_FAVORITE, 1);
 
         return testMovieValues;
     }
