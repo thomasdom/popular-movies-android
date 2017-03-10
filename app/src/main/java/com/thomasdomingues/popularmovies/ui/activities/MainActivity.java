@@ -3,61 +3,37 @@ package com.thomasdomingues.popularmovies.ui.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.thomasdomingues.popularmovies.R;
-import com.thomasdomingues.popularmovies.ui.adapters.MovieListAdapter;
 import com.thomasdomingues.popularmovies.data.MovieContract;
-import com.thomasdomingues.popularmovies.data.api.MoviesApiClient;
-import com.thomasdomingues.popularmovies.data.api.MoviesApiService;
-import com.thomasdomingues.popularmovies.data.api.responses.MovieListResponse;
-import com.thomasdomingues.popularmovies.models.Movie;
+import com.thomasdomingues.popularmovies.ui.adapters.MovieListAdapter;
+import com.thomasdomingues.popularmovies.ui.fragments.MovieDetailFragment;
+import com.thomasdomingues.popularmovies.ui.fragments.MovieListFragment;
 import com.thomasdomingues.popularmovies.utilities.PreferenceUtils;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-
 public class MainActivity extends RxAppCompatActivity implements
-        MovieListAdapter.MovieListAdapterOnClickHandler
+        MovieListAdapter.MovieListAdapterOnClickHandler,
+        MovieListFragment.OnFragmentInteractionListener,
+        MovieDetailFragment.OnFragmentInteractionListener
 {
+    /* Log tag */
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    /* Default number of columns displayed in the grid */
-    private static final int GRID_SPAN_COUNT = 2;
+    /* Fragment manager tags */
+    private static final String MOVIE_LIST_FRAGMENT_TAG = "fragment_movie_list";
+    private static final String MOVIE_DETAIL_FRAGMENT_TAG = "fragment_movie_detail";
 
-    /* TMDB API service */
-    private MoviesApiService mTmdbApiService;
+    /* Indicates if we are in tablet mode or handset mode */
+    private boolean mTwoPanes;
 
-    /* Movie grid adapter */
-    private MovieListAdapter mMovieListAdapter;
-
-    /* Recycler view position */
-    private int mPosition = RecyclerView.NO_POSITION;
-
-    /* Child views */
-    @BindView(R.id.rv_movie_list)
-    protected RecyclerView mRecyclerView;
-
-    @BindView(R.id.tv_error_message_display)
-    protected TextView mErrorMessageDisplay;
-
-    @BindView(R.id.pb_loading_indicator)
-    protected ProgressBar mLoadingIndicator;
+    /* Fragments */
+    private MovieListFragment mMovieListFragment;
 
     /**
      * {@inheritDoc}
@@ -68,27 +44,22 @@ public class MainActivity extends RxAppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /* Setup children views of main activity's layout */
-        ButterKnife.bind(this);
+        mTwoPanes = findViewById(R.id.movie_details_frag_placeholder) != null;
+    }
 
-        /* Setup TMDB API service */
-        mTmdbApiService = MoviesApiClient.getMoviesApiClientInstance();
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onPostCreate(savedInstanceState);
 
-        /* Setup adapter */
-        mMovieListAdapter = new MovieListAdapter(this, this);
+        mMovieListFragment = (MovieListFragment) getSupportFragmentManager().findFragmentByTag(MOVIE_LIST_FRAGMENT_TAG);
+        if (null == mMovieListFragment)
+        {
+            // TODO Switch fragments if favorites or movie list called
+            MovieListFragment fragment = MovieListFragment.newInstance();
 
-        /* Setup RecyclerView */
-        GridLayoutManager layoutManager =
-                new GridLayoutManager(this, GRID_SPAN_COUNT, GridLayoutManager.VERTICAL, false);
-        mRecyclerView
-                .setLayoutManager(layoutManager);
-
-        mRecyclerView.setHasFixedSize(true);
-
-        mRecyclerView.setAdapter(mMovieListAdapter);
-
-        /* Fetch movie list from API */
-        fetchMovies();
+            replaceMoviesFragment(fragment);
+        }
     }
 
     /**
@@ -112,12 +83,12 @@ public class MainActivity extends RxAppCompatActivity implements
         {
             case R.id.action_sort_by_popular:
                 PreferenceUtils.setUserSortCriteria(this, PreferenceUtils.SORT_BY_POPULAR);
-                fetchMovies();
+                mMovieListFragment.fetchMovies();
                 return true;
 
             case R.id.action_sort_by_top_rated:
                 PreferenceUtils.setUserSortCriteria(this, PreferenceUtils.SORT_BY_TOP_RATED);
-                fetchMovies();
+                mMovieListFragment.fetchMovies();
                 return true;
 
             default:
@@ -125,85 +96,23 @@ public class MainActivity extends RxAppCompatActivity implements
         }
     }
 
-    /**
-     * This method fetch movie list by saved criteria in SharedPreferences, right after
-     * cleaning the RecyclerView.
-     */
-    private void fetchMovies()
+    // TODO Implement save instance state callbacks
+
+    private void replaceMoviesFragment(MovieListFragment fragment)
     {
-        /* Setup loading UI */
-        showMovieList();
-        mLoadingIndicator.setVisibility(View.VISIBLE);
-
-        String sortByCriteria = PreferenceUtils.getUserSortCriteria(this);
-
-        mTmdbApiService.discoverMovies(sortByCriteria, 1)
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.newThread())
-                .map(MovieListResponse::getResults)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<List<Movie>>()
-                {
-                    boolean error = false;
-
-                    @Override
-                    public void onSubscribe(Disposable d)
-                    {
-                        Log.d(TAG, "onSubscribe : " + d.isDisposed());
-                    }
-
-                    @Override
-                    public void onNext(List<Movie> movies)
-                    {
-                        mMovieListAdapter.setMovieList(movies);
-                    }
-
-                    @Override
-                    public void onError(Throwable e)
-                    {
-                        Log.e(TAG, e.getMessage());
-                        error = true;
-                    }
-
-                    @Override
-                    public void onComplete()
-                    {
-                        mLoadingIndicator.setVisibility(View.INVISIBLE);
-
-                        if (mPosition == RecyclerView.NO_POSITION)
-                            mPosition = 0;
-
-                        mRecyclerView.smoothScrollToPosition(mPosition);
-
-                        if (error)
-                        {
-                            showErrorMessage();
-                        } else
-                        {
-                            showMovieList();
-                        }
-                    }
-                });
+        // TODO Set custom animations
+        mMovieListFragment = fragment;
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_list_frag_placeholder, fragment, MOVIE_LIST_FRAGMENT_TAG)
+                .commit();
     }
 
-    /**
-     * This method will make the View for the movie list data visible and
-     * hide the error message.
-     */
-    private void showMovieList()
+    private void replaceMovieDetailsFragment(MovieDetailFragment fragment)
     {
-        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-        mRecyclerView.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * This method will make the error message visible and hide the movie list
-     * View.
-     */
-    private void showErrorMessage()
-    {
-        mRecyclerView.setVisibility(View.INVISIBLE);
-        mErrorMessageDisplay.setVisibility(View.VISIBLE);
+        // TODO Set custom animations
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_details_frag_placeholder, fragment, MOVIE_DETAIL_FRAGMENT_TAG)
+                .commit();
     }
 
     /**
@@ -216,10 +125,23 @@ public class MainActivity extends RxAppCompatActivity implements
     {
         Log.d(TAG, "Clicked on movie ID: " + movieId);
 
-        Intent movieDetailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
-        Uri uriForMovieClicked = MovieContract.MovieEntry.buildMovieUriWithId(movieId);
-        movieDetailIntent.setData(uriForMovieClicked);
+        if (mTwoPanes)
+        {
+            MovieDetailFragment fragment = MovieDetailFragment.newInstance("", "");
+            replaceMovieDetailsFragment(fragment);
+        } else
+        {
+            Intent movieDetailIntent = new Intent(MainActivity.this, MovieDetailActivity.class);
+            Uri uriForMovieClicked = MovieContract.MovieEntry.buildMovieUriWithId(movieId);
+            movieDetailIntent.setData(uriForMovieClicked);
 
-        startActivity(movieDetailIntent);
+            startActivity(movieDetailIntent);
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri)
+    {
+
     }
 }
