@@ -23,4 +23,5 @@
     <string name="empty_movie_trailers">No videos for the moment.</string>
     <string name="tb_favorite_on_label">Favorite</string>
     <string name="tb_favorite_off_label">Not favorite</string>
+    <string name="action_show_favorite_movies">Favorite movies</string>
 </resources>

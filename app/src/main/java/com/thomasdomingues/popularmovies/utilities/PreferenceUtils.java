@@ -14,6 +14,7 @@ public class PreferenceUtils
     /* Sorting criterion */
     public final static String SORT_BY_POPULAR = "popular";
     public final static String SORT_BY_TOP_RATED = "top_rated";
+    public final static String FAVORITE_MOVIES = "favorite_movies";
 
     /**
      * Saves the sorting criteria for movie list.

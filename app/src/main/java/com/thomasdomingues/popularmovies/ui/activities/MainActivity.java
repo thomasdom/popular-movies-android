@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,14 +13,17 @@ import android.view.MenuItem;
 import com.thomasdomingues.popularmovies.R;
 import com.thomasdomingues.popularmovies.models.Movie;
 import com.thomasdomingues.popularmovies.ui.adapters.MovieListAdapter;
+import com.thomasdomingues.popularmovies.ui.fragments.FavoriteMovieListFragment;
 import com.thomasdomingues.popularmovies.ui.fragments.MovieDetailFragment;
 import com.thomasdomingues.popularmovies.ui.fragments.MovieListFragment;
 import com.thomasdomingues.popularmovies.utilities.PreferenceUtils;
+import com.thomasdomingues.popularmovies.utilities.UiUtils;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 public class MainActivity extends RxAppCompatActivity implements
         MovieListAdapter.MovieListAdapterOnClickHandler,
         MovieListFragment.OnFragmentInteractionListener,
+        FavoriteMovieListFragment.OnFragmentInteractionListener,
         MovieDetailFragment.OnFragmentInteractionListener
 {
     /* Log tag */
@@ -33,7 +37,7 @@ public class MainActivity extends RxAppCompatActivity implements
     private boolean mTwoPanes;
 
     /* Fragments */
-    private MovieListFragment mMovieListFragment;
+    private Fragment mMovieListFragment;
 
     /**
      * {@inheritDoc}
@@ -52,13 +56,10 @@ public class MainActivity extends RxAppCompatActivity implements
     {
         super.onPostCreate(savedInstanceState);
 
-        mMovieListFragment = (MovieListFragment) getSupportFragmentManager().findFragmentByTag(MOVIE_LIST_FRAGMENT_TAG);
+        mMovieListFragment = getSupportFragmentManager().findFragmentByTag(MOVIE_LIST_FRAGMENT_TAG);
         if (null == mMovieListFragment)
         {
-            // TODO Switch fragments if favorites or movie list called
-            MovieListFragment fragment = MovieListFragment.newInstance();
-
-            replaceMoviesFragment(fragment);
+            swapMovieListFragment();
         }
     }
 
@@ -83,12 +84,17 @@ public class MainActivity extends RxAppCompatActivity implements
         {
             case R.id.action_sort_by_popular:
                 PreferenceUtils.setUserSortCriteria(this, PreferenceUtils.SORT_BY_POPULAR);
-                mMovieListFragment.fetchMovies();
+                swapMovieListFragment();
                 return true;
 
             case R.id.action_sort_by_top_rated:
                 PreferenceUtils.setUserSortCriteria(this, PreferenceUtils.SORT_BY_TOP_RATED);
-                mMovieListFragment.fetchMovies();
+                swapMovieListFragment();
+                return true;
+
+            case R.id.action_show_favorite_movies:
+                PreferenceUtils.setUserSortCriteria(this, PreferenceUtils.FAVORITE_MOVIES);
+                swapMovieListFragment();
                 return true;
 
             default:
@@ -98,7 +104,7 @@ public class MainActivity extends RxAppCompatActivity implements
 
     // TODO Implement save instance state callbacks
 
-    private void replaceMoviesFragment(MovieListFragment fragment)
+    private void replaceMoviesFragment(Fragment fragment)
     {
         // TODO Set custom animations
         mMovieListFragment = fragment;
@@ -142,5 +148,17 @@ public class MainActivity extends RxAppCompatActivity implements
     public void onFragmentInteraction(Uri uri)
     {
 
+    }
+
+    private void swapMovieListFragment()
+    {
+        Fragment fragment;
+
+        if (UiUtils.isFavoriteMovieUserPrefs(this))
+            fragment = FavoriteMovieListFragment.newInstance();
+        else
+            fragment = MovieListFragment.newInstance();
+
+        replaceMoviesFragment(fragment);
     }
 }
