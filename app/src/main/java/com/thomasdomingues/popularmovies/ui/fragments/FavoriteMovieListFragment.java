@@ -33,10 +33,10 @@ import butterknife.ButterKnife;
 public class FavoriteMovieListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>
 {
-    private static final String TAG = FavoriteMovieListFragment.class.getSimpleName();
-
     /* Default number of columns displayed in the grid */
     private static final int GRID_SPAN_COUNT = 2;
+
+    private static final String EXTRA_MOVIE_LIST_POSITION = "movie_list_position";
 
     /* Activity listener */
     private OnFragmentInteractionListener mListener;
@@ -123,6 +123,11 @@ public class FavoriteMovieListFragment extends Fragment implements
 
         mRecyclerView.setAdapter(mMovieListAdapter);
 
+        if(savedInstanceState != null && savedInstanceState.containsKey(EXTRA_MOVIE_LIST_POSITION))
+        {
+            mPosition = savedInstanceState.getInt(EXTRA_MOVIE_LIST_POSITION);
+        }
+
         /* Fetch movie list from API */
         getActivity().getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, this);
     }
@@ -142,6 +147,15 @@ public class FavoriteMovieListFragment extends Fragment implements
         {
             mListener.onFragmentInteraction(uri);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        GridLayoutManager glm = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        int listPosition = glm.findFirstVisibleItemPosition();
+        outState.putInt(EXTRA_MOVIE_LIST_POSITION, listPosition);
     }
 
     @Override

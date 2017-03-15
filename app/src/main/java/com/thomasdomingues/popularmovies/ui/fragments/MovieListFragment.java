@@ -39,6 +39,8 @@ public class MovieListFragment extends RxFragment
     /* Default number of columns displayed in the grid */
     private static final int GRID_SPAN_COUNT = 2;
 
+    private static final String EXTRA_MOVIE_LIST_POSITION = "movie_list_position";
+
     /* Activity listener */
     private OnFragmentInteractionListener mListener;
 
@@ -119,6 +121,11 @@ public class MovieListFragment extends RxFragment
 
         /* Fetch movie list from API */
         fetchMovies();
+
+        if (null != savedInstanceState && savedInstanceState.containsKey(EXTRA_MOVIE_LIST_POSITION))
+        {
+            mPosition = savedInstanceState.getInt(EXTRA_MOVIE_LIST_POSITION);
+        }
     }
 
     // TODO Replace stub by real function
@@ -215,6 +222,15 @@ public class MovieListFragment extends RxFragment
                         }
                     }
                 });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        GridLayoutManager glm = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        int listPosition = glm.findFirstVisibleItemPosition();
+        outState.putInt(EXTRA_MOVIE_LIST_POSITION, listPosition);
     }
 
     /**
